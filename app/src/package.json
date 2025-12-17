@@ -1,0 +1,27 @@
+{
+  "name": "secure-nodejs-app",
+  "version": "1.0.0",
+  "description": "Secure Node.js application for DevSecOps demo",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest --coverage",
+    "lint": "eslint .",
+    "security-audit": "npm audit --audit-level=high"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.6.3",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.52.0",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

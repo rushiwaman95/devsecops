@@ -1,0 +1,209 @@
+======================================================
+tfsec is joining the Trivy family
+
+tfsec will continue to remain available
+for the time being, although our engineering
+attention will be directed at Trivy going forward.
+
+You can read more here:
+https://github.com/aquasecurity/tfsec/discussions/1994
+======================================================
+
+Result #1 CRITICAL Security group rule allows egress to multiple public internet addresses.
+────────────────────────────────────────────────────────────────────────────────
+  vpc.tf:121
+────────────────────────────────────────────────────────────────────────────────
+  104    resource "aws_security_group" "vpc_endpoints" {
+  ...
+  121  [     cidr_blocks = ["0.0.0.0/0"]
+  ...
+  133    }
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-no-public-egress-sgr
+      Impact Your port is egressing data to the internet
+  Resolution Set a more restrictive cidr range
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/no-public-egress-sgr/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #2 CRITICAL Public cluster access is enabled.
+────────────────────────────────────────────────────────────────────────────────
+  terraform-aws-modules/eks/aws/src/.terraform/modules/eks/main.tf:37
+   via eks.tf:1-159 (module.eks)
+────────────────────────────────────────────────────────────────────────────────
+   25    resource "aws_eks_cluster" "this" {
+   ..
+   37  [     endpoint_public_access  = var.cluster_endpoint_public_access (true)
+   ..
+   91    }
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-eks-no-public-cluster-access
+      Impact EKS can be access from the internet
+  Resolution Don't enable public access to EKS Clusters
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/eks/no-public-cluster-access/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#endpoint_public_access
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #3 CRITICAL Cluster allows access from a public CIDR: 0.0.0.0/0.
+────────────────────────────────────────────────────────────────────────────────
+  terraform-aws-modules/eks/aws/src/.terraform/modules/eks/main.tf:38
+   via eks.tf:1-159 (module.eks)
+────────────────────────────────────────────────────────────────────────────────
+   25    resource "aws_eks_cluster" "this" {
+   ..
+   38  [     public_access_cidrs     = var.cluster_endpoint_public_access_cidrs
+   ..
+   91    }
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-eks-no-public-cluster-access-to-cidr
+      Impact EKS can be accessed from the internet
+  Resolution Don't enable public access to EKS Clusters
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/eks/no-public-cluster-access-to-cidr/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#vpc_config
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #4 CRITICAL Security group rule allows egress to multiple public internet addresses.
+────────────────────────────────────────────────────────────────────────────────
+  terraform-aws-modules/eks/aws/src/.terraform/modules/eks/node_groups.tf:223
+   via eks.tf:1-159 (module.eks)
+────────────────────────────────────────────────────────────────────────────────
+  207    resource "aws_security_group_rule" "node" {
+  ...
+  223  [   cidr_blocks              = lookup(each.value, "cidr_blocks", null)
+  ...
+  228    }
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-no-public-egress-sgr
+      Impact Your port is egressing data to the internet
+  Resolution Set a more restrictive cidr range
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/no-public-egress-sgr/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #5 CRITICAL Security group rule allows egress to multiple public internet addresses.
+────────────────────────────────────────────────────────────────────────────────
+  terraform-aws-modules/eks/aws/src/.terraform/modules/eks/node_groups.tf:224
+   via eks.tf:1-159 (module.eks)
+────────────────────────────────────────────────────────────────────────────────
+  207    resource "aws_security_group_rule" "node" {
+  ...
+  224  [   ipv6_cidr_blocks         = lookup(each.value, "ipv6_cidr_blocks", null)
+  ...
+  228    }
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-no-public-egress-sgr
+      Impact Your port is egressing data to the internet
+  Resolution Set a more restrictive cidr range
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/no-public-egress-sgr/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+────────────────────────────────────────────────────────────────────────────────
+
+
+Results #6-7 HIGH IAM policy document uses sensitive action 's3:GetObject' on wildcarded resource 'arn:aws:s3:::devsecops-demo-*' (2 similar results)
+────────────────────────────────────────────────────────────────────────────────
+  iam.tf:29
+────────────────────────────────────────────────────────────────────────────────
+   24    resource "aws_iam_policy" "app_policy" {
+   ..
+   29  [     Version = "2012-10-17"
+   ..
+   66    }
+────────────────────────────────────────────────────────────────────────────────
+  Individual Causes
+  - iam.tf:24-66 (aws_iam_policy.app_policy) 2 instances
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-iam-no-policy-wildcards
+      Impact Overly permissive policies may grant access to sensitive resources
+  Resolution Specify the exact permissions required, and to which resources they should apply instead of using wildcards.
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/iam/no-policy-wildcards/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #8 MEDIUM VPC Flow Logs is not enabled for VPC 
+────────────────────────────────────────────────────────────────────────────────
+  terraform-aws-modules/vpc/aws/src/.terraform/modules/vpc/main.tf:28-51
+   via vpc.tf:1-42 (module.vpc)
+────────────────────────────────────────────────────────────────────────────────
+   28  ┌ resource "aws_vpc" "this" {
+   29  │   count = local.create_vpc ? 1 : 0
+   30  │
+   31  │   cidr_block          = var.use_ipam_pool ? null : var.cidr
+   32  │   ipv4_ipam_pool_id   = var.ipv4_ipam_pool_id
+   33  │   ipv4_netmask_length = var.ipv4_netmask_length
+   34  │
+   35  │   assign_generated_ipv6_cidr_block     = var.enable_ipv6 && !var.use_ipam_pool ? true : null
+   36  └   ipv6_cidr_block                      = var.ipv6_cidr
+   ..
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-require-vpc-flow-logs-for-all-vpcs
+      Impact Without VPC flow logs, you risk not having enough information about network traffic flow to investigate incidents or identify security issues.
+  Resolution Enable flow logs for VPC
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/require-vpc-flow-logs-for-all-vpcs/
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #9 LOW Log group is not encrypted.
+────────────────────────────────────────────────────────────────────────────────
+  main.tf:21-26
+────────────────────────────────────────────────────────────────────────────────
+   21    resource "aws_cloudwatch_log_group" "eks" {
+   22      name              = "/aws/eks/${var.cluster_name}/cluster"
+   23      retention_in_days = 30
+   24
+   25      tags = local.common_tags
+   26    }
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-cloudwatch-log-group-customer-key
+      Impact Log data may be leaked if the logs are compromised. No auditing of who have viewed the logs.
+  Resolution Enable CMK encryption of CloudWatch Log Groups
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/cloudwatch/log-group-customer-key/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group#kms_key_id
+────────────────────────────────────────────────────────────────────────────────
+
+
+  timings
+  ──────────────────────────────────────────
+  disk i/o             445.010065ms
+  parsing              2.182347204s
+  adaptation           5.390537ms
+  checks               5.541415ms
+  total                2.638289221s
+
+  counts
+  ──────────────────────────────────────────
+  modules downloaded   0
+  modules processed    14
+  blocks processed     1785
+  files read           67
+
+  results
+  ──────────────────────────────────────────
+  passed               62
+  ignored              0
+  critical             5
+  high                 2
+  medium               1
+  low                  1
+
+  62 passed, 9 potential problem(s) detected.
