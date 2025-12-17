@@ -67,6 +67,17 @@ Before running the pipeline, ensure you have:
 6.  **Deploy**: Update Kubernetes manifests and apply changes.
 
 ---
+## ⚡ Dir Structure
+├── app/                  # Java Application Source Code
+│   ├── src/              # App logic
+│   └── Dockerfile/       # Instructions to build the image   
+├── k8s/                  # Kubernetes Manifests
+│   ├── deployment.yaml   # Pod & ReplicaSet config
+│   └── service.yaml      # Service (NodePort/LB) config
+├── terraform/            #IAC
+├── Jenkinsfile           # The Declarative Pipeline Script
+├── README.md             # Project Documentation
+
 
 ## ⚡ Getting Started
 
